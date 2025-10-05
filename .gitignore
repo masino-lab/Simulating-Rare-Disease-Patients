@@ -127,3 +127,48 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+#
+#
+#
+#
+# my own additions:
+# -----------------------
+# Data files (from Harvard Dataverse)
+# -----------------------
+data_release/
+*.zip
+
+# -----------------------
+# Simulation outputs
+# -----------------------
+*.jsonl
+*.pkl
+*.csv
+
+# -----------------------
+# Logs and temporary files
+# -----------------------
+*.log
+*.tmp
+__pycache__/
+*.py[cod]
+
+# -----------------------
+# Environments
+# -----------------------
+.env
+.venv/
+venv/
+env/
+*.yml~
+*.yaml~
+
+# -----------------------
+# OS & IDE
+# -----------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
