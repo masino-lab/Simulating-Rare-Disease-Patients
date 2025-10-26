@@ -3,7 +3,7 @@ import random, csv
 #set seed to be reproduceable
 random.seed(42)
 
-#define the true phenotypes associated with each of the 5 diseases in a list
+#define the true phenotypes associated with each of the 5 diseases in a dict
 TRUE_PHENOTYPES = {
     #Multiple epiphyseal dysplasia, Al-Gazali type
     "D001": ["HP:0000256", "HP:0000272", "HP:0000316", "HP:0000369", "HP:0000470", "HP:0000767",
@@ -20,7 +20,7 @@ TRUE_PHENOTYPES = {
         "HP:0010818", "HP:0012018", "HP:0200134", "HP:0000243"]
 }
 
-#create a noisy array (20 noisy HPO)
+#create a noisy list (20 noisy HPO)
 NOISY_HPOS = ["HP:0001990", "HP:0002024", "HP:0002167", "HP:0002204", "HP:0002240", 
     "HP:0002360", "HP:0002650", "HP:0002684", "HP:0002750", "HP:0002997", "HP:0003103", 
     "HP:0003196", "HP:0003468", "HP:0004337", "HP:0004568", "HP:0008430", "HP:0008551", 
