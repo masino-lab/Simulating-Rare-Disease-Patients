@@ -9,6 +9,7 @@ UDN_PATH = PROJECT_ROOT / 'processed_udn'
 SIMULATOR_DIR = PROJECT_ROOT / 'simulation_resources' / 'simulator_preprocess'
 GENERATED_VCF_PATH = PROJECT_ROOT / 'generated_vcfs'
 
+
 ############
 # SIMULATION SOURCES
 ORPHANET_PATH = Path(PROJECT_ROOT / 'orphanet' )
