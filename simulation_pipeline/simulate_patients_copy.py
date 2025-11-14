@@ -29,9 +29,9 @@ pd.options.mode.chained_assignment = None
 SEED = 42
 
 # STEP 1: logical flow
-# 1. imports and constrints
-# 2. healper utilities (I/O and naming): lihgt weight and don't depend on the simulation state
-# 3. core logic: actaully do the simulation
+# 1. imports and constraints
+# 2. helper utilities (I/O and naming): light weight and don't depend on the simulation state
+# 3. core logic: actually do the simulation
 # 4. higher level orchestarors: high level controllers of the full pipeline
 # 5. entry point
 
@@ -51,7 +51,7 @@ simulation_outcome_counts = {
 
 def read_orphanet_data(args):
     '''
-    read in the phenotype, gene, and metadata from Orphanet data
+    Read in the phenotype, gene, and metadata from Orphanet data
     '''
     base_path = config.ORPHANET_PATH
     phenotypes = pd.read_csv(base_path / 'orphanet_final_disease_hpo_normalized_2015.tsv', sep='\t', dtype=str)
@@ -64,13 +64,13 @@ def read_orphanet_data(args):
 def get_dataset_statistics(patients):
     '''
     Calculate basic statistics about the simulated data:
-        average # of distractor genes
-        average # of positive and negative phenotypes
+        Average # of distractor genes
+        Average # of positive and negative phenotypes
     '''
     
-    n_distractors = [(len(pateint.get_distractor_genes())) for patient in patients]
+    n_distractors = [(len(patient.get_distractor_genes())) for patient in patients]
     n_positive_phenotypes = [(len(patient.get_hpo_set(is_positive = True))) for patient in patients]
-    n_negative_phenotypes = [(len(pateint.get_hpo_set(is_positive = False))) for patien in patients]
+    n_negative_phenotypes = [(len(patient.get_hpo_set(is_positive = False))) for patient in patients]
 
     logging.info('Total number of patients simulated: {}'.format(len(patients)))
     logging.info('Average number of distractor genes: {}'.format(sum(n_distractors)/len(n_distractors)))
@@ -103,7 +103,7 @@ def get_output_filename(args):
 def simulate_patient(args, simulator, patient, disease):
     '''
     simulates a single patient:
-        1. intialize phenotypes
+        1. initialize phenotypes
         2. for sampled n_distractor_genes, run distractor gene module 
         3. add noisy phenotypes
     '''
@@ -118,21 +118,18 @@ def simulate_patient(args, simulator, patient, disease):
         config.PROB_DROPOUT_POS, config.PROB_DROPOUT_NEG, config.PROB_CORRUPTION_POS, config.PROB_CORRUPTION_NEG, \
             perform_phenotype_dropout=perform_phenotype_dropout, perform_phenotype_corruption=perform_phenotype_corruption)
 
-    
-    logging.info('--- Sampling Distractor Genes ---')
     # sample n_distractor_genes. Distractor genes are realistic "noise" in the gene list
-    # these genes can be sampled randomly or using a gene module
+    logging.info('--- Sampling Distractor Genes ---')
 
-    
     # First, determine the number of distractor genes for the patient. This can be a random number based on N_DISTRACTORS_LAMBDA, or 
     # a hard coded number.
 
     n_distractor_genes = 1 + np.random.poisson(config.N_DISTRACTORS_LAMBDA - 1) 
     patient.n_distractor_genes = n_distractor_genes
-    if args.sim_many_genes: # for the ablation analysis, we want to simulate patients with large number of genes and then downsample
+    if args.sim_many_genes: # for the ablation analysis, we want to simulate patients with large number of genes and then down-sample
         n_distractor_genes = 100
 
-    # intalize the number of distractor genes added, the distractor gene sampler, and the finish state of the simulation
+    # initialize the number of distractor genes added, the distractor gene sampler, and the finish state of the simulation
     n_distractor_genes_added = 0
     gene_sampler_names = list(simulator.gene_samplers.keys())
     unfinished = False
@@ -155,7 +152,7 @@ def simulate_patient(args, simulator, patient, disease):
             # sample gene module
             if args.equal_probs: # randomly
                 sampled_name = str(np.random.choice(gene_sampler_names,1)[0])
-            else: # from config file probabilites
+            else: # from config file probabilities
                 sampled_name = str(np.random.choice(gene_sampler_names,1, p=[config.NON_SYNDROM_PHEN_PROB, \
                 config.COMMON_FP_PROB, config.TISSUE_DIST_PROB, config.PATH_PHEN_PROB, config.INSUFF_EXPLAIN_PROB, \
                 config.UNIVERSAL_DIST_PROB, config.PHENO_DIST_PROB])[0])
@@ -167,10 +164,10 @@ def simulate_patient(args, simulator, patient, disease):
             #   - 'gene_added'                -> successfully added distractor gene
             #   - 'gene_impossible_to_add'    -> module is unable to add this particular gene
             #   - 'gene_not_added'            -> module failed this round
-            
+
             for i in range(config.MAX_ADD_GENE_ATTEMPTS):  
                 
-                 # intalizie if the gene was added to the module
+                 # initialize if the gene was added to the module
                 did_add_gene = gene_module(patient, n_distractor_genes_added)
 
                 # Tabulate Simulation Outcomes
@@ -211,9 +208,11 @@ def simulate_patient(args, simulator, patient, disease):
 
 def run_simulation(args, filename):
     '''
-    Run Rare Diease Patient Simulation
+    Run Rare Disease Patient Simulation
+        1. Read in Orphanet Data and cerate a disease dictionary
+        2. Initialize the patient simulator
+        3. Simulate Patients
     '''
-
     logging.basicConfig(format='%(message)s', level=logging.WARNING)
 
     # set random seed to ensure replicability
@@ -236,6 +235,10 @@ def run_simulation(args, filename):
     
     # for each disease, simulate X patients 
     logging.info('\n\n------Simulating Patients------')
+    # Determine how many patients per disease will be simulated. 
+    # simulate_patient() will be called for each patient and then that patient will be added to the list of finished patients.
+    # The list of finished patients will then be written to a simulation output file
+
     patients = []
     unfinished_patients = []
     for orphanet_id, disease in tqdm(disease_dict.items()):
@@ -289,7 +292,7 @@ def parse_args():
     parser.add_argument('--no_gene_module_phen', action='store_true', help='Remove phenotypes added through gene modules from the pipeline.')
 
     # parameters for ablation analyses 
-    parser.add_argument('--sim_many_genes', action='store_true', help='Simulate patients with many distractor genes each. These can be downsampled for ablation analyses.')
+    parser.add_argument('--sim_many_genes', action='store_true', help='Simulate patients with many distractor genes each. These can be down-sampled for ablation analyses.')
     parser.add_argument('--random_genes', action='store_true', help='Randomly sample distractor genes instead of using gene modules.')
     parser.add_argument('--equal_probs', action='store_true', help='Sample gene modules with equal probabilities. This is used for the ablation analysis.')
 
