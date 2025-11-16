@@ -58,8 +58,8 @@ def read_orphanet_data(args):
     genes = pd.read_csv(base_path / 'orphanet_final_disease_genes_normalized_2015.tsv', sep='\t', dtype=str)
     metadata = pd.read_csv(base_path / 'orphanet_final_disease_metadata_normalized_2015.tsv', sep='\t', dtype=str)
 
-    print(f'There are {len(orphanet_metadata.index)} diseases to simulate from Orphanet.')
-    return orphanet_phenotypes, orphanet_genes, orphanet_metadata
+    print(f'There are {len(metadata.index)} diseases to simulate from Orphanet.')
+    return phenotypes, genes, metadata
 
 def get_dataset_statistics(patients):
     '''
@@ -110,8 +110,8 @@ def simulate_patient(args, simulator, patient, disease):
     logging.info('--- Initialize phenotypes --- ')
     
     # whether to perform phenotype corruption/dropout
-    perform_phenotype_corruption = ~ args.no_phen_corruption
-    perform_phenotype_dropout = ~ args.no_phen_dropout
+    perform_phenotype_corruption = not args.no_phen_corruption
+    perform_phenotype_dropout = not args.no_phen_dropout
 
     # initialize phenotypes for patient with disease
     simulator.initialize_phenotypes(patient, disease, \
@@ -135,7 +135,7 @@ def simulate_patient(args, simulator, patient, disease):
     unfinished = False
     
    # Determine how to sample the distractor genes. 
-       if args.random_genes: #randomly add genes
+    if args.random_genes: #randomly add genes
         while n_distractor_genes_added < n_distractor_genes: 
             did_add_gene = simulator.get_random_gene(patient) # randomly add a gene to a patient
             if did_add_gene == 'gene_added':
