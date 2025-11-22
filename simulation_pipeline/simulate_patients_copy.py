@@ -28,14 +28,13 @@ pd.options.mode.chained_assignment = None
 
 SEED = 42
 
-# STEP 1: logical flow
-# 1. imports and constraints
-# 2. helper utilities (I/O and naming): light weight and don't depend on the simulation state
-# 3. core logic: actually do the simulation
-# 4. higher level orchestarors: high level controllers of the full pipeline
-# 5. entry point
+'''
+This is the entry point of the simulation. This program simulates rare disease patient profiles by combining Orphanet 
+disease data with probabilistic models adding noise, dropout, and distractor genes. 
 
-
+This file coordinates the components of the simulation pipeline by reading in data, running simulation logic, and 
+exporting results. 
+'''
 
 
 # dict to keep track of the the # of genes added from each gene module
@@ -48,6 +47,9 @@ simulation_outcome_counts = {
     'universal_distractor' : defaultdict(int),
     'phenotype_distractor' : defaultdict(int)
 }
+
+###################################################################################################
+# HELPER UTILITIES (I/O AND NAMING)
 
 def read_orphanet_data(args):
     '''
@@ -99,6 +101,9 @@ def get_output_filename(args):
         filename = f"ablations/{filename}"
 
     return filename
+
+###################################################################################################
+# CORE SIMULATION LOGIC
 
 def simulate_patient(args, simulator, patient, disease):
     '''
@@ -221,7 +226,7 @@ def run_simulation(args, filename):
     os.environ['PYTHONHASHSEED']=str(SEED)
 
     # read in orphanet data & filter to diseases from timstamp = args.timstamp
-    orphanet_phenotypes, orphanet_genes, orphanet_metadata = read_orphanet_data(args)
+    phenotypes, genes, metadata = read_orphanet_data(args)
 
     # create dict mapping orphanet_id -> Disease
     disease_dict = create_disease_dict(orphanet_phenotypes, orphanet_genes, orphanet_metadata)
@@ -279,6 +284,9 @@ def run_simulation(args, filename):
             json.dump(patient_dict, output_file)
             output_file.write('\n')
 
+###################################################################################################
+# HIGH-LEVEL SIMULATION ORCHESTRATORS
+
 def parse_args():
     parser = argparse.ArgumentParser(description='Simulate rare disease patients')
 
@@ -298,6 +306,9 @@ def parse_args():
 
     args = parser.parse_args()
     return args
+
+###################################################################################################
+# SIMULATION ENTRY POINT
 
 if __name__ == "__main__":
     args = parse_args()
