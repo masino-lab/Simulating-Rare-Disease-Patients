@@ -104,8 +104,8 @@ class Patient():
             if allow_switch:
                 self.remove_phenotype(hpo_id, not is_positive)
             else:
-                raise Exception('Tried to add phenotype to {'positive' if is_positive else 'negative'} list, \
-                    that is already in {'negative' if is_positive else 'negative'} phenotype list & allow_switch = False')
+                raise Exception(f"Tried to add phenotype to {'positive' if is_positive else 'negative'} list,"
+                    f"that is already in {'negative' if is_positive else 'negative'} phenotype list & allow_switch = False")
 
         # add the hpo_id to the corresponding phenotype dict
         if hpo_id in current_dict:
@@ -150,15 +150,17 @@ class Patient():
         else:
             self.dropout_phen_dict['negative_phenotypes'].append(phenotype)
 
-    def track_corruption_phenotype(self, phenotype: str, is_positive: bool) -> None:
+    def track_corruption_phenotype(self, phenotype: str, ancestor: str, is_positive: bool) -> None:
         '''
         This method is mainly used for error analysis & ablations to keep track of what phenotypes were dropped
         during the corruption phase.
         '''
         if is_positive:
-            self.corruption_phen_dict['positive_phenotypes'].append(phenotype)
+            self.corruption_phen_dict['positive_phenotypes_corrupted'].append(phenotype)
+            self.corruption_phen_dict['positive_phenotypes_replacement'].append(ancestor)
         else:
-            self.corruption_phen_dict['negative_phenotypes'].append(phenotype)
+            self.corruption_phen_dict['negative_phenotypes_corrupted'].append(phenotype)
+            self.corruption_phen_dict['negative_phenotypes_replacement'].append(ancestor)
 
 
 ###################################################################################################

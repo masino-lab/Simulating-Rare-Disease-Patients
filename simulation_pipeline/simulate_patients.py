@@ -153,7 +153,7 @@ def get_dataset_statistics(patients):
     logging.info('Average number of negative phenotypes: {}'.format(sum(n_negative_phenotypes)/len(n_negative_phenotypes)))
 
 
-def read_data(args):
+def read_orphanet_data(args):
     '''
     read in orphanet data
     '''
@@ -219,7 +219,7 @@ def run_simulation(args, filename):
     os.environ['PYTHONHASHSEED']=str(SEED)
 
     # read in orphanet data & filter to diseases from timstamp = args.timstamp
-    orphanet_phenotypes, orphanet_genes, orphanet_metadata = read_data(args)
+    orphanet_phenotypes, orphanet_genes, orphanet_metadata = read_orphanet_data(args)
 
     # create dict mapping orphanet_id -> Disease
     disease_dict = create_disease_dict(orphanet_phenotypes, orphanet_genes, orphanet_metadata)

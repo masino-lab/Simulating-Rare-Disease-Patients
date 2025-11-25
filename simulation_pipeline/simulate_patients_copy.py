@@ -20,9 +20,9 @@ plt.switch_backend('agg')
 import seaborn as sns
 
 import config
-from simulation_pipeline.modules.patient_simulator import PatientSimulator
+from simulation_pipeline.modules.patient_simulator_copy import PatientSimulator
 from simulation_pipeline.modules.disease import Disease
-from simulation_pipeline.modules.patient import Patient
+from simulation_pipeline.modules.patient_copy import Patient
 from simulation_pipeline.utils.util import create_disease_dict
 pd.options.mode.chained_assignment = None
 
@@ -229,7 +229,7 @@ def run_simulation(args, filename):
     phenotypes, genes, metadata = read_orphanet_data(args)
 
     # create dict mapping orphanet_id -> Disease
-    disease_dict = create_disease_dict(orphanet_phenotypes, orphanet_genes, orphanet_metadata)
+    disease_dict = create_disease_dict(phenotypes, genes, metadata)
     
     # initialize simulator
     logging.info('------Initializing Patient Simulator------')
