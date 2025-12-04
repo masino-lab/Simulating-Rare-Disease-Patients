@@ -62,27 +62,29 @@ class PatientSimulator():
             - phenotype_distractor_dict: ``Dict[str, Set(str)]``
         '''
         phenotype_distractor_loc = config.SIMULATOR_DIR / 'phenotype_distractor_dict.pkl'
+        # checking to see if the phenotype distractor dict already exists
         if phenotype_distractor_loc.exists() and not self.override:
-            # load dict
-            phenotype_distractor_dict = self.read_pkl(phenotype_distractor_loc)
-        else:
-            phenotype_distractor_dict = defaultdict(set)
-            for orphanet_id, disease in self.diseases_dict.items():
-                for distractor_id, distractor_disease in self.diseases_dict.items():
-                    if orphanet_id == distractor_id: continue
-                    if self._is_phenotype_distractor(disease, distractor_disease):
-                            phenotype_distractor_dict[orphanet_id].add(distractor_id)
-                
-            # calculate statistics on coverage
-            n_distractors = [len(distractor_ids) for orphanet_id, distractor_ids in phenotype_distractor_dict.items()]
-            logging.info('{} percent of orphanet diseases have at least one candidate phenotype distractor disease.' \
-                .format(100*len(phenotype_distractor_dict.keys())/len(self.diseases_dict.keys())))
-            logging.info('There are {:0.1f} phenotype distractor diseases on average.'.format(sum(n_distractors)/len(n_distractors)))
+            return self.read_pkl(phenotype_distractor_loc)
 
-            phenotype_distractor_dict = {k:list(v) for k, v in phenotype_distractor_dict.items()}
+        # otherwise, create a new dict
+        phenotype_distractor_dict = defaultdict(set)
 
-            #write dict to file
-            self.write_pkl(phenotype_distractor_dict, phenotype_distractor_loc)
+        for orphanet_id, disease in self.diseases_dict.items():
+            for distractor_id, distractor_disease in self.diseases_dict.items():
+                if orphanet_id == distractor_id: continue
+                if self._is_phenotype_distractor(disease, distractor_disease):
+                        phenotype_distractor_dict[orphanet_id].add(distractor_id)
+            
+        # calculate statistics on coverage
+        n_distractors = [len(distractor_ids) for orphanet_id, distractor_ids in phenotype_distractor_dict.items()]
+        logging.info('{} percent of orphanet diseases have at least one candidate phenotype distractor disease.' \
+            .format(100*len(phenotype_distractor_dict.keys())/len(self.diseases_dict.keys())))
+        logging.info('There are {:0.1f} phenotype distractor diseases on average.'.format(sum(n_distractors)/len(n_distractors)))
+
+        phenotype_distractor_dict = {k:list(v) for k, v in phenotype_distractor_dict.items()}
+
+        #write dict to file
+        self.write_pkl(phenotype_distractor_dict, phenotype_distractor_loc)
         
         return phenotype_distractor_dict
 
@@ -104,23 +106,48 @@ class PatientSimulator():
         universal_distractor_loc = config.SIMULATOR_DIR / 'universal_distractor_dict.pkl'
         if universal_distractor_loc.exists() and not self.override:
             universal_distractor_dict = self.read_pkl(universal_distractor_loc)
-        else:
-            universal_distractor_dict = defaultdict(set)
-            for orphanet_id, disease in self.diseases_dict.items():
-                for distractor_id, distractor_disease in self.diseases_dict.items():
-                    if orphanet_id == distractor_id: continue
-                    distractor_obligates = distractor_disease.get_obligate_phenotypes()
-                    distractor_excluded = distractor_disease.get_excluded_phenotypes()
-                    if len(distractor_obligates) > 0:
-                        #make sure obligate phenotypes don't overlap
-                        if not self._is_intersect(disease.get_obligate_phenotypes(), distractor_obligates):
-                            universal_distractor_dict[orphanet_id].add(distractor_id)
 
-                    if len(distractor_excluded) > 0:
-                        #make sure excluded phenotypes don't overlap
-                        if not self._is_intersect(disease.get_excluded_phenotypes(), distractor_excluded):
-                            universal_distractor_dict[orphanet_id].add(distractor_id)
-            
+        else:
+            # pre-compute obligate and excluded phenotypes at once 
+            # cached for efficiency 
+            obligate = {orphanet_id: disease.get_obligate_phenotypes() for orphanet_id, disease in self.diseases_dict.items()}
+            excluded = {orphanet_id: disease.get_excluded_phenotypes() for orphanet_id, disease in self.diseases_dict.items()}
+
+            distractor_map = defaultdict(set)
+
+            # pre-compute which diseases have obligates and excluded phenotypes
+            # cached for efficiency
+            disease_with_obligates = [orphanet_id for orphanet_id in obligate if obligate[orphanet_id]]
+            disease_with_excluded = [orphanet_id for orphanet_id in excluded if excluded[orphanet_id]]
+
+            universal_distractor_dict = defaultdict(set)
+
+            '''
+            for B in disease_with_obligates:
+                for A in all diseases:
+                    check obligates for pair (A,B)
+            '''
+
+            # check obligate-based distractors
+            for distractor_id in disease_with_obligates:
+                distractor_obligates = obligate[distractor_id]
+                for orphanet_id in self.diseases_dict:
+                    if orphanet_id == distractor_id:
+                        continue
+                    #make sure obligate phenotypes don't overlap
+                    if not self._is_intersect(obligate[orphanet_id], distractor_obligates):
+                        universal_distractor_dict[orphanet_id].add(distractor_id)
+
+            # check excluded-based distractors   
+            for distractor_id in disease_with_excluded:
+                distractor_excluded = obligate[distractor_id]
+                for orphanet_id in self.disease.dict:
+                    if orphanet_id == distractor_id:
+                        continue
+                    #make sure obligate phenotypes don't overlap
+                    if not self._is_intersect(disease.get_excluded_phenotypes(), distractor_excluded):
+                        universal_distractor_dict[orphanet_id].add(distractor_id)        
+
             universal_distractor_dict = {k:list(v) for k, v in universal_distractor_dict.items()}
 
             self.write_pkl(universal_distractor_dict, universal_distractor_loc)
@@ -140,8 +167,8 @@ class PatientSimulator():
         To do this, we create a pandas dataframe containing gene-HPO edges from disegenet,
         excluding any genes listed as monogenic disease-causing in Orphanet or HPOA.
 
-        These non-disease genes are used in the insufficiently explanatory or gene causing causing non-syndromic
-        phenotytes gene modules.
+        These non-disease genes are used in the insufficiently explanatory or gene causing non-syndromic
+        phenotypes gene modules.
         '''
 
         # Read in HPOA, Orpha, and Disgenet Data
