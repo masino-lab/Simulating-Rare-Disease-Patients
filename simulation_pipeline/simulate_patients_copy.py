@@ -24,6 +24,8 @@ from simulation_pipeline.modules.patient_simulator_copy import PatientSimulator
 from simulation_pipeline.modules.disease import Disease
 from simulation_pipeline.modules.patient_copy import Patient
 from simulation_pipeline.utils.util import create_disease_dict
+from simulation_pipeline.utils.util_copy import important_logger
+
 pd.options.mode.chained_assignment = None
 
 SEED = 42
@@ -75,8 +77,7 @@ def get_dataset_statistics(patients):
     n_negative_phenotypes = [(len(patient.get_hpo_set(is_positive = False))) for patient in patients]
 
     logging.info('Total number of patients simulated: {}'.format(len(patients)))
-    logging.info('Average number of distractor genes: {}'.format(sum(n_distractors)/len(n_distractors)))
-    logging.info('Average number of positive phenotypes: {}'.format(sum(n_positive_phenotypes)/len(n_positive_phenotypes)))
+    logging.info('Average number of distractor genes: {}'.format(sum(n_distractors)/len(n_distractors)))    # logging.info('Average number of positive phenotypes: {}'.format(sum(n_positive_phenotypes)/len(n_positive_phenotypes)))
     logging.info('Average number of negative phenotypes: {}'.format(sum(n_negative_phenotypes)/len(n_negative_phenotypes)))
 
 def get_output_filename(args):
@@ -112,6 +113,8 @@ def simulate_patient(args, simulator, patient, disease):
         2. for sampled n_distractor_genes, run distractor gene module 
         3. add noisy phenotypes
     '''
+
+    important_logger.info(f'{patient.patient_id} This message goes to the loggingOutput.txt')
     logging.info('--- Initialize phenotypes --- ')
     
     # whether to perform phenotype corruption/dropout
@@ -219,6 +222,8 @@ def run_simulation(args, filename):
         3. Simulate Patients
     '''
     logging.basicConfig(format='%(message)s', level=logging.WARNING)
+    #logging.basicConfig(level = logging.INFO, filename = "logOutput.txt", filemode = "w", 
+    #   format = "%(asctime)s - %(levelname)s - %(message)s")
 
     # set random seed to ensure replicability
     random.seed(SEED)
@@ -278,6 +283,12 @@ def run_simulation(args, filename):
     #save to jsonl file
     with open(config.SIMULATED_DATA_PATH / filename, "w") as output_file:
         for n, patient in enumerate(patients):
+            # patient.simulation_id = n+1
+            # print ("increment_simulation_id is about to be increased: ", {patient.get_simulation_id()} )
+            # patient.increment_simulation_id()
+            # print ("increment_simulation_id IS NOW: ", {patient.get_simulation_id()} )
+            
+
             patient_dict = patient.to_dict()
             patient_dict['id'] = n
             

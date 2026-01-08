@@ -6,6 +6,7 @@ import random
 import logging
 
 from simulation_pipeline.modules.disease import Disease
+from simulation_pipeline.utils.util_copy import important_logger
 
 '''
 This module defines the Patient class which encapsulates the data and logic needed to model, modify, and analyze a 
@@ -18,6 +19,8 @@ patient data.
 
 
 class Patient():
+
+    _patient_counter = 0
 ###################################################################################################
 # INITIALIZATION HELPERS
 
@@ -62,6 +65,9 @@ class Patient():
 
         self.dropout_phen_dict = defaultdict(list)
         self.corruption_phen_dict = defaultdict(list)
+        self.patient_id = Patient._patient_counter
+        Patient._patient_counter += 1
+
 
 ###################################################################################################
 # CORE MUTATION METHODS
@@ -117,6 +123,8 @@ class Patient():
         '''
         Loop through all phenotype dicts & remove hpo_id 
         '''
+        important_logger.info(f'{self.patient_id}: removing phenotype HPO_ID: {hpo_id}')
+
         logging.info(f'Removing phenotype HPO_ID: {hpo_id}')
 
         for is_distractor in (True, False):
@@ -132,7 +140,8 @@ class Patient():
         NOTE: in future iterations of the pipeline, consider checking to see if there's an association between gene & 
             disease in other data sources beyond Orphanet
         '''
-        logging.info(f'Adding distractor gene {gene_id} from module {source_module}')
+        # write_logging_to_file(f"Adding distractor gene {gene_id} from module {source_module}", patients=self)
+        # logging.info(f'Adding distractor gene {gene_id} from module {source_module}')
         if gene_id in self.distractor_gene_dict:
             self.distractor_gene_dict[gene_id].append(source_module)
         else: self.distractor_gene_dict[gene_id] = [source_module]
