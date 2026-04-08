@@ -77,8 +77,16 @@ def get_dataset_statistics(patients):
     n_negative_phenotypes = [(len(patient.get_hpo_set(is_positive = False))) for patient in patients]
 
     logging.info('Total number of patients simulated: {}'.format(len(patients)))
-    logging.info('Average number of distractor genes: {}'.format(sum(n_distractors)/len(n_distractors)))    # logging.info('Average number of positive phenotypes: {}'.format(sum(n_positive_phenotypes)/len(n_positive_phenotypes)))
+    important_logger.info('Total number of patients simulated: {}'.format(len(patients)))
+    
+    logging.info('Average number of distractor genes: {}'.format(sum(n_distractors)/len(n_distractors))) 
+    important_logger.info('Average number of distractor genes: {}'.format(sum(n_distractors)/len(n_distractors)))
+    
+    logging.info('Average number of positive phenotypes: {}'.format(sum(n_positive_phenotypes)/len(n_positive_phenotypes)))
+    important_logger.info('Average number of positive phenotypes: {}'.format(sum(n_positive_phenotypes)/len(n_positive_phenotypes)))
+    
     logging.info('Average number of negative phenotypes: {}'.format(sum(n_negative_phenotypes)/len(n_negative_phenotypes)))
+    important_logger.info('Average number of negative phenotypes: {}'.format(sum(n_negative_phenotypes)/len(n_negative_phenotypes)))
 
 def get_output_filename(args):
     '''
@@ -114,7 +122,6 @@ def simulate_patient(args, simulator, patient, disease):
         3. add noisy phenotypes
     '''
 
-    important_logger.info(f'{patient.patient_id} This message goes to the loggingOutput.txt')
     logging.info('--- Initialize phenotypes --- ')
     
     # whether to perform phenotype corruption/dropout
@@ -222,8 +229,6 @@ def run_simulation(args, filename):
         3. Simulate Patients
     '''
     logging.basicConfig(format='%(message)s', level=logging.WARNING)
-    #logging.basicConfig(level = logging.INFO, filename = "logOutput.txt", filemode = "w", 
-    #   format = "%(asctime)s - %(levelname)s - %(message)s")
 
     # set random seed to ensure replicability
     random.seed(SEED)

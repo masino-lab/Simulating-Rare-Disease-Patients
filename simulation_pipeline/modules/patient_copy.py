@@ -123,9 +123,9 @@ class Patient():
         '''
         Loop through all phenotype dicts & remove hpo_id 
         '''
-        important_logger.info(f'{self.patient_id}: removing phenotype HPO_ID: {hpo_id}')
-
+        
         logging.info(f'Removing phenotype HPO_ID: {hpo_id}')
+        important_logger.info(f'{self.patient_id}: Removing phenotype HPO_ID: {hpo_id}') 
 
         for is_distractor in (True, False):
             current_dict = self._get_phenotype_dict(is_positive, is_distractor)
@@ -140,8 +140,9 @@ class Patient():
         NOTE: in future iterations of the pipeline, consider checking to see if there's an association between gene & 
             disease in other data sources beyond Orphanet
         '''
-        # write_logging_to_file(f"Adding distractor gene {gene_id} from module {source_module}", patients=self)
-        # logging.info(f'Adding distractor gene {gene_id} from module {source_module}')
+        logging.info(f'Adding distractor gene {gene_id} from module {source_module}')
+        important_logger.info(f'{self.patient_id}: Adding distractor gene {gene_id} from module {source_module}')
+
         if gene_id in self.distractor_gene_dict:
             self.distractor_gene_dict[gene_id].append(source_module)
         else: self.distractor_gene_dict[gene_id] = [source_module]

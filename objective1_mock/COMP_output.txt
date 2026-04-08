@@ -1,0 +1,46 @@
+===== Unstratified Data =====
+
+$DF
+              Estimate    SE z-value p-value
+X:(Intercept)   0.0422   NaN     NaN     NaN
+X:age          -0.0003 1e-04 -1.9197 0.05489
+S:(Intercept)  -5.0376   NaN     NaN     NaN
+
+$DF.lambda
+NULL
+
+$DF.nu
+   Estimate  SE
+nu   0.0065 NaN
+
+$n
+[1] 200
+
+$loglik
+[1] -1427.635
+
+$aic
+[1] 2861.27
+
+$bic
+[1] 2871.165
+
+$optim.method
+[1] "L-BFGS-B"
+
+$opt.message
+[1] "CONVERGENCE: REL_REDUCTION_OF_F <= FACTR*EPSMCH"
+
+$opt.convergence
+[1] 0
+
+$elapsed.sec
+[1] 0.3198102
+
+
+
+
+===== Stratsfied Data =====
+
+===== Stratsfied Data =====
+

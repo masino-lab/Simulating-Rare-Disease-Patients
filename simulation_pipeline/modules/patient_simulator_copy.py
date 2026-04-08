@@ -686,6 +686,30 @@ class PatientSimulator():
                 n_strong = 1 + np.random.poisson(config.STRONG_PHENOTYPES_LAMBDA - 1)
                 n_weak = 1 + np.random.poisson(config.WEAK_PHENOTYPES_LAMBDA - 1)
 
+                # determining how many phenotpyes to add (NB model)
+                # age = patient.get_age()
+                # if age == 'Onset_Infant':
+                #     age = 0
+                # elif age == 'Onset_Child':
+                #     age = 1
+                # elif age == 'Onset_Adolescent':
+                #     age = 2
+                # elif age == 'Onset_Adult':
+                #     age = 3
+                # else:
+                #     age = 4
+
+                # strong_mu = np.exp(config.STRONG_BETA_0 + config.STRONG_BETA_1 * age)
+                # strong_n = 1/config.STRONG_ALPHA
+                # strong_p = strong_n / (strong_n + strong_mu)
+                # n_strong = 1 + np.random.negative_binomial(strong_n, strong_p)
+
+                # # weak
+                # weak_mu = np.exp(config.WEAK_BETA_0 + config.WEAK_BETA_1 * age)
+                # weak_n = 1/config.WEAK_ALPHA
+                # weak_p = weak_n / (weak_n + weak_mu)
+                # n_weak = 1 + np.random.negative_binomial(weak_n, weak_p)
+
                 weak_intersection = list(disease_weak_phenotypes.intersection(distractor_weak_phenotypes))
                 if len(weak_intersection) > 0:
                     # check to see if weak phenotypes are already in the patient
