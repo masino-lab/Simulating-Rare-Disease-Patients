@@ -22,13 +22,14 @@ def main():
     
     output_dataframe = input_dataframe[input_dataframe["disease_id"].isin(diseases)].copy()
 
-    # mapping age catagory to number
+    # mapping age category to number
     mapping = {'Onset_Infant': 0, 'Onset_Child': 1, 'Onset_Adolescent': 2, 'Onset_Adult': 3, 'Onset_Elderly': 4}
     output_dataframe['age'] = output_dataframe['age'].map(mapping)
 
-    output_file = "abbrev_mock_data.jsonl"
+    # map to csv
+    output_file = "abbrev_mock_data.csv"
     try:
-        output_dataframe.to_json(output_file, orient="records", lines=True)
+        output_dataframe.to_csv(output_file)
     except:
         print (f"Could not open file {output_file}")
     
